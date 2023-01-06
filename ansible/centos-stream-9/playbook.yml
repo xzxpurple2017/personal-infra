@@ -1,0 +1,84 @@
+---
+- hosts: localhost
+  become: true
+  tasks:
+  - name: Add modules
+    community.general.modprobe:
+      name: "{{ item.name }}"
+      state: present
+    with_items:
+      - {name: br_netfilter}
+      - {name: overlay}
+  - name: Install list of packages
+    yum:
+      name: "{{ item.name }}"
+      state: present
+      lock_timeout: 120
+    with_items:
+      - {name: epel-release}
+      - {name: bridge-utils}
+      - {name: dnf-automatic}
+      - {name: expect}
+      - {name: gcc-c++}
+      - {name: golang-github-prometheus}
+      - {name: golang-github-prometheus-alertmanager}
+      - {name: grafana}
+      - {name: htop}
+      - {name: jq}
+      - {name: libcap-ng-utils}
+      - {name: lm_sensors}
+      - {name: lm_sensors-sensord}
+      - {name: libguestfs}
+      - {name: libvirt}
+      - {name: libvirt-nss}
+      - {name: make}
+      - {name: nc}
+      - {name: nginx}
+      - {name: openssl-devel}
+      - {name: podman-docker}
+      - {name: python3}
+      - {name: python3-libvirt}
+      - {name: qemu-kvm}
+      - {name: telnet}
+      - {name: tmux}
+      - {name: tree}
+      - {name: virt-install}
+      - {name: virt-manager}
+      - {name: wget}
+      - {name: xrdp}
+      - {name: yum-utils}
+  - name: Add User to libvirt group
+    user:
+      name: "{{ ansible_user_id }}"
+      groups: libvirt
+  - name: Make sure services are enabled
+    ansible.builtin.systemd:
+      name: "{{ item.name }}"
+      enabled: yes
+    with_items:
+      - {name: chronyd}
+      - {name: cockpit.service}
+      - {name: kdump}
+      - {name: libvirtd}
+      - {name: sensord}
+      - {name: tuned}
+      - {name: xrdp}
+      - {name: xrdp-sesman}
+  - name: Make sure services are started
+    ansible.builtin.systemd:
+      name: "{{ item.name }}"
+      state: started
+    with_items:
+      - {name: chronyd}
+      - {name: cockpit.service}
+      - {name: kdump}
+      - {name: libvirtd}
+      - {name: sensord}
+      - {name: tuned}
+      - {name: xrdp}
+      - {name: xrdp-sesman}
+  - name: Permit traffic in default zone for RDP server
+    ansible.posix.firewalld:
+      port: 3389/tcp
+      permanent: yes
+      state: enabled
