@@ -114,15 +114,16 @@ After=network.target
 
 [Service]
 EnvironmentFile=/etc/ansible/ansible-pull.env
-ExecStart=/bin/bash -c "(/bin/ps aux | /bin/grep '/usr/bin/ansible-pull' | /bin/grep -qv 'grep') || /usr/bin/ansible-pull \\
-  -U \$GIT_REPO \\
-  -C \$GIT_BRANCH \\
-  -d \$GIT_PATH \\
-  -c local \\
-  --verify-commit \\
-  --key-file \$GIT_PRIVATE_KEY_PATH \\
-  \$PLAYBOOK_FILE" \\
-  && rm -rf \$GIT_PATH
+ExecStart=/bin/bash -c "(/bin/ps aux | /bin/grep '/usr/bin/ansible-pull' | /bin/grep -qv 'grep') \\
+    || (/usr/bin/ansible-pull \\
+    -U \$GIT_REPO \\
+    -C \$GIT_BRANCH \\
+    -d \$GIT_PATH \\
+    -c local \\
+    --verify-commit \\
+    --key-file \$GIT_PRIVATE_KEY_PATH \\
+    \$PLAYBOOK_FILE \\
+    && rm -rf \$GIT_PATH)"
 Type=oneshot
 User=root
 Group=root
