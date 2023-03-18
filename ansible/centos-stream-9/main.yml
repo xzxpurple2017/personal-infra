@@ -82,3 +82,5 @@
       port: 3389/tcp
       permanent: yes
       state: enabled
+    vars:
+      ansible_python_interpreter: /usr/bin/python
