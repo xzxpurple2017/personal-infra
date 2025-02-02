@@ -7,10 +7,12 @@ Prerequisites:
 
 NOTES:
 
+* -- This script must be run with Administrator privileges --
 * Tested on Windows 11 Pro with Adaptec 5805ZQ RAID controller.
 * Ran on Python 3.13
 """
 
+import re
 import subprocess
 import xml.etree.ElementTree as ET
 
@@ -125,9 +127,27 @@ def check_controller(controller_id):
     
     return failing_disks
 
+def get_controller_ids():
+    cmd = ['arcconf', 'GETVERSION']
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    output = result.stdout
+
+    controller_ids = []
+    for line in output.splitlines():
+        match = re.match(r'Controller #(\d+)', line)
+        if match:
+            controller_ids.append(int(match.group(1)))
+
+    return controller_ids
+
 def main():
     print("SMART Attribute Status Check\n" + "="*40)
-    for controller_id in range(1, 5):  # Check controllers 1-4
+    controller_ids = get_controller_ids()
+    if not controller_ids:
+        print("No controllers found.")
+        return
+
+    for controller_id in controller_ids:
         print(f"\nChecking Controller {controller_id}...")
         failing_disks = check_controller(controller_id)
         
