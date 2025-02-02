@@ -5,6 +5,15 @@ Prerequisites:
 * Adaptec RAID controller driver is installed locally. 
 * arcconf.exe tool accessible in current directory or in PATH. 
 
+Example:
+
+PS D:\system_tools\drivers\Adaptec 5805ZQ Drivers\windows_x64\cmdline> python .\get_disk_status.py
+SMART Attribute Status Check
+========================================
+
+Checking Controller 1...
+  ✅ All disks healthy on controller 1
+
 NOTES:
 
 * -- This script must be run with Administrator privileges --
