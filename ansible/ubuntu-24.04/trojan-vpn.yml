@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  become: true
+  tasks:
+  - name: Install required packages
+    apt:
+      name: "{{ item.name }}"
+      state: present
+      update_cache: yes
+    with_items:
+      - {name: wget}
+      - {name: curl}
+      - {name: ufw}
+      - {name: gnupg2}
+      - {name: software-properties-common}
+      - {name: apt-transport-https}
+      - {name: ca-certificates}
+      - {name: lsb-release}
