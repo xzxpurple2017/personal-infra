@@ -20,3 +20,15 @@
       - {name: certbot}
       - {name: python3-certbot-nginx}
       - {name: trojan}
+  - name: Ensure UFW is enabled
+    ufw:
+      state: enabled
+      policy: allow
+  - name: Allow OpenSSH through UFW
+    ufw:
+      rule: allow
+      name: OpenSSH
+  - name: Allow Nginx Full through UFW
+    ufw:
+      rule: allow
+      name: 'Nginx Full'
