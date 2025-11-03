@@ -1,34 +1,34 @@
 ---
 - hosts: localhost
   become: true
+  vars_files:
+    - vars.yml
   tasks:
   - name: Install required packages
     apt:
-      name: "{{ item.name }}"
+      name: "{{ required_packages }}"
       state: present
       update_cache: yes
-    with_items:
-      - {name: wget}
-      - {name: curl}
-      - {name: ufw}
-      - {name: gnupg2}
-      - {name: software-properties-common}
-      - {name: apt-transport-https}
-      - {name: ca-certificates}
-      - {name: lsb-release}
-      - {name: nginx}
-      - {name: certbot}
-      - {name: python3-certbot-nginx}
-      - {name: trojan}
   - name: Ensure UFW is enabled
     ufw:
       state: enabled
-      policy: allow
-  - name: Allow OpenSSH through UFW
+      policy: "{{ ufw_policy }}"
+  
+  - name: Configure UFW rules
     ufw:
       rule: allow
-      name: OpenSSH
-  - name: Allow Nginx Full through UFW
-    ufw:
-      rule: allow
-      name: 'Nginx Full'
+      name: "{{ item.name }}"
+    loop: "{{ ufw_rules }}"
+
+  - name: Start and enable Nginx
+    ansible.builtin.systemd:
+      name: nginx
+      state: started
+      enabled: yes
+
+  - name: Obtain SSL certificate with Certbot
+    command: >
+      certbot --nginx -n --agree-tos --email {{ ssl_email }} -d {{ domain_name }}
+    register: certbot_result
+    changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
+    failed_when: certbot_result.rc != 0 and 'Certificate not yet due for renewal' not in certbot_result.stdout

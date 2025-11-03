@@ -1,0 +1,25 @@
+---
+# SSL Certificate Configuration
+ssl_email: "philipdam8@gmail.com"
+domain_name: "justhosting.usinfotech.llc"
+
+# Package list for installation
+required_packages:
+  - wget
+  - curl
+  - ufw
+  - gnupg2
+  - software-properties-common
+  - apt-transport-https
+  - ca-certificates
+  - lsb-release
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+  - trojan
+
+# UFW Configuration
+ufw_policy: allow
+ufw_rules:
+  - name: OpenSSH
+  - name: 'Nginx Full'
