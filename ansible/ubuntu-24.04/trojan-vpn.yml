@@ -16,3 +16,7 @@
       - {name: apt-transport-https}
       - {name: ca-certificates}
       - {name: lsb-release}
+      - {name: nginx}
+      - {name: certbot}
+      - {name: python3-certbot-nginx}
+      - {name: trojan}
