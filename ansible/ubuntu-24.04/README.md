@@ -12,6 +12,12 @@ sudo apt-get install ansible-core -y
 
 ## Server roles
 
+### Configure SSH server
+Insert your SSH public key so you can log in without password. 
+```
+ansible-playbook ssh.yml --ask-become-pass
+```
+
 ### Trojan VPN server
 To install Trojan VPN server on Ubuntu 24.04, configure the `vars.yml` \
 Then, run the playbook.
