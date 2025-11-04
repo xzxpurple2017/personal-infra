@@ -35,6 +35,25 @@
     changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
     failed_when: certbot_result.rc != 0 and 'Certificate not yet due for renewal' not in certbot_result.stdout
 
+  - name: Fix Let's Encrypt live directory permissions
+    file:
+      path: /etc/letsencrypt/live
+      mode: '0755'
+      state: directory
+
+  - name: Fix Let's Encrypt archive directory permissions
+    file:
+      path: /etc/letsencrypt/archive
+      mode: '0755'
+      state: directory
+
+  - name: Fix Let's Encrypt domain archive permissions
+    file:
+      path: "/etc/letsencrypt/archive/{{ domain_name }}"
+      mode: '0644'
+      state: directory
+      recurse: yes
+
   - name: Check if Trojan password file exists
     stat:
       path: /root/trojan-password.txt
