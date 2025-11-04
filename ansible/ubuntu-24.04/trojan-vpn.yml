@@ -50,7 +50,7 @@
   - name: Fix Let's Encrypt domain archive permissions
     file:
       path: "/etc/letsencrypt/archive/{{ domain_name }}"
-      mode: '0644'
+      mode: '0755'
       state: directory
       recurse: yes
 
