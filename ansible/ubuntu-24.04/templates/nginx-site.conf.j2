@@ -1,0 +1,15 @@
+server {
+    listen 80;
+    server_name {{ domain_name }};
+    
+    location / {
+        root /var/www/html;
+        index index.html index.htm;
+    }
+    
+    # Optional: Add some basic content for when people access via HTTP
+    location = / {
+        return 200 "This server is running";
+        add_header Content-Type text/plain;
+    }
+}

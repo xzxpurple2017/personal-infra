@@ -1,0 +1,22 @@
+---
+# Handlers for trojan-vpn playbook
+
+- name: restart trojan
+  ansible.builtin.systemd:
+    name: trojan
+    state: restarted
+
+- name: reload trojan
+  ansible.builtin.systemd:
+    name: trojan
+    state: reloaded
+
+- name: reload nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+
+- name: restart nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: restarted

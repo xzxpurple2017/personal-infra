@@ -3,6 +3,8 @@
   become: true
   vars_files:
     - vars.yml
+  handlers:
+    - import_tasks: handlers/main.yml
   tasks:
   - name: Install required packages
     apt:
@@ -33,9 +35,46 @@
     changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
     failed_when: certbot_result.rc != 0 and 'Certificate not yet due for renewal' not in certbot_result.stdout
 
-  - name: Generate random Trojan password
+  - name: Check if Trojan password file exists
+    stat:
+      path: /root/trojan-password.txt
+    register: password_file
+
+  - name: Generate random Trojan password (only if not exists)
     set_fact:
       trojan_password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+    when: not password_file.stat.exists
+
+  - name: Read existing Trojan password (if exists)
+    slurp:
+      src: /root/trojan-password.txt
+    register: existing_password
+    when: password_file.stat.exists
+
+  - name: Set Trojan password from existing file
+    set_fact:
+      trojan_password: "{{ existing_password.content | b64decode | trim }}"
+    when: password_file.stat.exists
+
+  - name: Remove default Nginx site
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent
+    notify: reload nginx
+
+  - name: Configure Nginx site (port 80 only)
+    template:
+      src: nginx-site.conf.j2
+      dest: "/etc/nginx/sites-available/{{ domain_name }}"
+      mode: '0644'
+    notify: reload nginx
+
+  - name: Enable Nginx site
+    file:
+      src: "/etc/nginx/sites-available/{{ domain_name }}"
+      dest: "/etc/nginx/sites-enabled/{{ domain_name }}"
+      state: link
+    notify: reload nginx
 
   - name: Ensure Trojan config directory exists
     file:
@@ -47,7 +86,7 @@
     template:
       src: trojan-config.json.j2
       dest: /etc/trojan/config.json
-      mode: '0644'
+      mode: '0600'
       backup: yes
     notify: restart trojan
 
@@ -55,11 +94,12 @@
     debug:
       msg: "Trojan password: {{ trojan_password }}"
 
-  - name: Save Trojan password to file
+  - name: Save Trojan password to file (only if new)
     copy:
       content: "{{ trojan_password }}"
       dest: /root/trojan-password.txt
       mode: '0600'
+    when: not password_file.stat.exists
 
   - name: Configure Let's Encrypt renewal with Trojan deploy hook
     template:
@@ -73,9 +113,3 @@
       name: trojan
       state: started
       enabled: yes
-
-  handlers:
-    - name: restart trojan
-      ansible.builtin.systemd:
-        name: trojan
-        state: restarted
