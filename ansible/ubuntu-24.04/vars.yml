@@ -1,5 +1,6 @@
 ---
 # SSL Certificate Configuration
+# NOTE: PLEASE CHANGE THESE VALUES BEFORE DEPLOYMENT
 ssl_email: "philipdam8@gmail.com"
 domain_name: "justhosting.usinfotech.llc"
 
@@ -23,3 +24,13 @@ ufw_policy: allow
 ufw_rules:
   - name: OpenSSH
   - name: 'Nginx Full'
+
+# Trojan Configuration
+trojan_config:
+  local_addr: "0.0.0.0"
+  local_port: 443
+  remote_addr: "127.0.0.1"
+  remote_port: 80
+  log_level: 1
+  cert_path: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+  key_path: "/etc/letsencrypt/live/{{ domain_name }}/privkey.pem"

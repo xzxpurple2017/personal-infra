@@ -1,0 +1,16 @@
+# renew_before_expiry = 30 days
+version = 2.9.0
+archive_dir = /etc/letsencrypt/archive/{{ domain_name }}
+cert = /etc/letsencrypt/live/{{ domain_name }}/cert.pem
+privkey = /etc/letsencrypt/live/{{ domain_name }}/privkey.pem
+chain = /etc/letsencrypt/live/{{ domain_name }}/chain.pem
+fullchain = /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
+
+# Options used in the renewal process
+[renewalparams]
+account = {{ letsencrypt_account_id | default('f74ec786f593d92f7edffc684fd879b3') }}
+authenticator = nginx
+installer = nginx
+server = https://acme-v02.api.letsencrypt.org/directory
+key_type = ecdsa
+deploy_hook = systemctl reload trojan

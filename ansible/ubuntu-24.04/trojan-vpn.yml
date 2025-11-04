@@ -32,3 +32,50 @@
     register: certbot_result
     changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
     failed_when: certbot_result.rc != 0 and 'Certificate not yet due for renewal' not in certbot_result.stdout
+
+  - name: Generate random Trojan password
+    set_fact:
+      trojan_password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+
+  - name: Ensure Trojan config directory exists
+    file:
+      path: /etc/trojan
+      state: directory
+      mode: '0755'
+
+  - name: Configure Trojan
+    template:
+      src: trojan-config.json.j2
+      dest: /etc/trojan/config.json
+      mode: '0600'
+      backup: yes
+    notify: restart trojan
+
+  - name: Display Trojan password
+    debug:
+      msg: "Trojan password: {{ trojan_password }}"
+
+  - name: Save Trojan password to file
+    copy:
+      content: "{{ trojan_password }}"
+      dest: /root/trojan-password.txt
+      mode: '0600'
+
+  - name: Configure Let's Encrypt renewal with Trojan deploy hook
+    template:
+      src: letsencrypt-renewal.conf.j2
+      dest: "/etc/letsencrypt/renewal/{{ domain_name }}.conf"
+      mode: '0644'
+      backup: yes
+
+  - name: Ensure Trojan service is started and enabled
+    ansible.builtin.systemd:
+      name: trojan
+      state: started
+      enabled: yes
+
+  handlers:
+    - name: restart trojan
+      ansible.builtin.systemd:
+        name: trojan
+        state: restarted
