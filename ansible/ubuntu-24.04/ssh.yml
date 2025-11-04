@@ -1,0 +1,61 @@
+---
+- hosts: localhost
+  become: true
+  vars_files:
+    - vars.yml
+  handlers:
+    - import_tasks: handlers/main.yml
+  tasks:
+  - name: Get current user info
+    getent:
+      database: passwd
+      key: "{{ ansible_user_id }}"
+    register: user_info
+
+  - name: Set home directory fact
+    set_fact:
+      user_home: "{{ user_info.ansible_facts.getent_passwd[ansible_user_id][4] }}"
+
+  - name: Ensure .ssh directory exists
+    file:
+      path: "{{ user_home }}/.ssh"
+      state: directory
+      mode: '0700'
+      owner: "{{ ansible_user_id }}"
+      group: "{{ ansible_user_id }}"
+
+  - name: Add SSH public key to authorized_keys
+    authorized_key:
+      user: "{{ ansible_user_id }}"
+      state: present
+      key: "{{ ssh_public_key }}"
+      comment: "philip@DESKTOP-MGCFDQD"
+
+  - name: Configure OpenSSH server
+    template:
+      src: sshd_config.j2
+      dest: /etc/ssh/sshd_config
+      mode: '0644'
+      backup: yes
+    notify: restart sshd
+
+  - name: Check if cloud-init SSH config exists
+    stat:
+      path: /etc/ssh/sshd_config.d/50-cloud-init.conf
+    register: cloud_init_ssh_config
+
+  - name: Disable password authentication in cloud-init config
+    lineinfile:
+      path: /etc/ssh/sshd_config.d/50-cloud-init.conf
+      regexp: '^PasswordAuthentication'
+      line: 'PasswordAuthentication no'
+      backup: yes
+    when: cloud_init_ssh_config.stat.exists
+    notify: restart sshd
+
+  - name: Remove cloud-init SSH config file (alternative approach)
+    file:
+      path: /etc/ssh/sshd_config.d/50-cloud-init.conf
+      state: absent
+    when: cloud_init_ssh_config.stat.exists
+    notify: restart sshd

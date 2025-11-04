@@ -34,3 +34,7 @@ trojan_config:
   log_level: 1
   cert_path: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
   key_path: "/etc/letsencrypt/live/{{ domain_name }}/privkey.pem"
+
+# SSH Configuration
+ssh_password_auth: "no"
+ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWboxVhqvg+bo7Sy9xWkrTvtzG97+1gq6/whIx+EZ2WBS1QVbYwBwggVkQvqL/pS3Seh37KgoZnIDGmiXiqqGkfvfPkwQd/v6CnG51GHuSFpiTSOLH2Qg0qB2I5dtQW68KbMIfVHIw8BrZvixlInH/8/D44o9s4eSZzTw+PiDq7fV4t4y8d+vmcrRm6iaLzsmqbwpqwRQtMia3XUrYliBnZC4rpNBFSsruCHxgLE+kkW9Wz7sNWzNcOdB+ifPO9+tVuYdV7Bu7QCh+s3qDybX0hOvS/omxyQYpxpwsRCpjrsBj9A5gnQ8Rs2FeFI3s41fgzWuilcS7PBEs2WHYAJUT philip@DESKTOP-MGCFDQD"
