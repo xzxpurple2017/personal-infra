@@ -28,9 +28,15 @@
       state: started
       enabled: yes
 
-  - name: Obtain SSL certificate with Certbot
+  - name: Ensure webroot directory exists
+    file:
+      path: /var/www/html
+      state: directory
+      mode: '0755'
+
+  - name: Obtain SSL certificate with Certbot (webroot mode)
     command: >
-      certbot --nginx -n --agree-tos --email {{ ssl_email }} -d {{ domain_name }}
+      certbot certonly --webroot -w /var/www/html -n --agree-tos --email {{ ssl_email }} -d {{ domain_name }}
     register: certbot_result
     changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
     failed_when: certbot_result.rc != 0 and 'Certificate not yet due for renewal' not in certbot_result.stdout
@@ -53,6 +59,21 @@
       mode: '0755'
       state: directory
       recurse: yes
+
+  - name: Remove Certbot's SSL configuration from Nginx (Trojan will handle 443)
+    replace:
+      path: "/etc/nginx/sites-available/{{ domain_name }}"
+      regexp: '(?s)listen 443 ssl;.*?ssl_dhparam.*?\.pem;.*?# managed by Certbot'
+      replace: ''
+    notify: reload nginx
+    when: certbot_result is defined
+
+  - name: Ensure Nginx only listens on port 80
+    lineinfile:
+      path: "/etc/nginx/sites-available/{{ domain_name }}"
+      regexp: '^\s*listen 443'
+      state: absent
+    notify: reload nginx
 
   - name: Check if Trojan password file exists
     stat:

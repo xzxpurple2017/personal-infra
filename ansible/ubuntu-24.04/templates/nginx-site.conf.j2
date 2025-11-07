@@ -2,6 +2,11 @@ server {
     listen 80;
     server_name {{ domain_name }};
     
+    # ACME challenge location for Let's Encrypt
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+    
     location / {
         root /var/www/html;
         index index.html index.htm;
