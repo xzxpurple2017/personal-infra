@@ -81,11 +81,17 @@
       state: absent
     notify: reload nginx
 
+  - name: Check if Nginx site config already exists
+    stat:
+      path: "/etc/nginx/sites-available/{{ domain_name }}"
+    register: nginx_site_exists
+
   - name: Configure Nginx site (port 80 only)
     template:
       src: nginx-site.conf.j2
       dest: "/etc/nginx/sites-available/{{ domain_name }}"
       mode: '0644'
+      force: no
     notify: reload nginx
 
   - name: Enable Nginx site
