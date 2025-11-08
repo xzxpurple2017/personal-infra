@@ -126,6 +126,8 @@ echo "# Creating Ansible pull systemd unit file"
 cat > /etc/systemd/system/ansible-pull.service <<-EOF
 [Unit]
 Description=Run ansible-pull
+Documentation="https://github.com/xzxpurple2017/personal-infra/tree/main/ansible/${os}#readme"
+Documentation="https://docs.ansible.com/ansible/latest/cli/ansible-pull.html"
 After=network.target
 
 [Service]
