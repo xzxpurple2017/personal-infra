@@ -99,7 +99,7 @@ EOF
 echo "# Writing Github deploy key"
 tmp_git_dir=$( mktemp -d -t XXXXXXXX )
 git clone "${BOOTSTRAP_REPO}" ${tmp_git_dir}
-ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass ansible-vault view ${tmp_git_dir}/ansible/${os}/secrets.yml | yq eval '.github_readonly_deploy_key' - > ${GH_DEPLOY_KEY}
+ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass ansible-vault view ${tmp_git_dir}/ansible/${os}/secrets.yml | yq -r .github_readonly_deploy_key > ${GH_DEPLOY_KEY}
 rm -rf ${tmp_git_dir}
 rm -rf .vault_pass
 echo
