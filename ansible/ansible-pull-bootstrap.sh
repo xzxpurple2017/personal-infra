@@ -20,6 +20,8 @@ read -s -p "Enter Ansible Vault password: " vault_pass_input
 echo "$vault_pass_input" > .vault_pass
 chmod 600 .vault_pass
 
+echo
+echo
 # Determine operating system
 echo "# Determining OS"
 hostname_output=$( hostnamectl 2> /dev/null )
