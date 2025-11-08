@@ -23,8 +23,8 @@ if [[ $( echo "$hostname_output" | grep -o 'Amazon Linux 2' ) = "Amazon Linux 2"
     os="amzn2"
 elif [[ $( echo "$hostname_output" | grep -o 'CentOS Stream 9' ) = "CentOS Stream 9" ]] ; then
     os="centos-stream-9"
-elif [[ $( echo "$hostname_output" | grep -o 'Ubuntu 18.04' ) = "Ubuntu 18.04" ]] ; then
-    os="ubuntu1804"
+elif [[ $( echo "$hostname_output" | grep -o 'Ubuntu 24.04' ) = "Ubuntu 24.04" ]] ; then
+    os="ubuntu-24.04"
 elif [[ $( echo "$hostname_output" | grep -o 'CentOS Linux 7' ) = "CentOS Linux 7" ]] ; then
     os="centos7"
 else
@@ -43,7 +43,7 @@ elif [[ "$os" = "centos-stream-9" ]] ; then
     dnf install -y epel-release
     sleep 10
     dnf install -y ansible-core git #python3-boto3
-elif [[ "$os" = "ubuntu1804" ]] ; then
+elif [[ "$os" = "ubuntu-24.04" ]] ; then
     apt-get update
     sleep 10
     apt-get install -y ansible git python-boto python-boto3
