@@ -15,6 +15,11 @@
 # - Ubuntu 18.04
 #
 
+# Get Ansible Vault password
+read -s -p "Enter Ansible Vault password: " vault_pass_input
+echo "$vault_pass_input" > .vault_pass
+chmod 600 .vault_pass
+
 # Determine operating system
 echo "# Determining OS"
 hostname_output=$( hostnamectl 2> /dev/null )
@@ -31,27 +36,32 @@ else
     os="generic"
 fi
 
+# Ansible Git repositories
+# Change as needed
+BOOTSTRAP_REPO="git@github.com:xzxpurple2017/personal-infra.git"
+PLAYBOOK_REPO="git@github.com:xzxpurple2017/personal-infra.git"
+
 if [[ "$os" = "amzn2" ]] ; then
     # Install EPEL if on Amazon Linux 2
     AMZN_EPEL_REPO='https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm'
     yum update -y
     yum install -y $AMZN_EPEL_REPO
     sleep 10
-    yum install -y ansible git python2-boto python2-boto3
+    yum install -y ansible git python2-boto python2-boto3 yq
 elif [[ "$os" = "centos-stream-9" ]] ; then
     dnf update -y
     dnf install -y epel-release
     sleep 10
-    dnf install -y ansible-core git #python3-boto3
+    dnf install -y ansible-core git yq
 elif [[ "$os" = "ubuntu-24.04" ]] ; then
     apt-get update
     sleep 10
-    apt-get install -y ansible git python-boto python-boto3
+    apt-get install -y ansible-core git yq
 elif [[ "$os" = "centos7" ]] ; then
     yum update -y
     yum install -y epel-release
     sleep 10
-    yum install -y ansible git python2-boto python2-boto3
+    yum install -y ansible git python2-boto python2-boto3 yq
 else
     echo "---------------------------------------"
     echo "Please install Ansible and Git manually"
@@ -69,28 +79,35 @@ for key in ${gpg_pub_key_list[@]} ; do
     gpg --keyserver keyserver.ubuntu.com --recv-keys ${key}
 done
 
+GH_DEPLOY_KEY="/etc/ansible/ansible-pull.key"
+
 # Create env file
 echo "# Creating Ansible environment variable file"
+mkdir -p /etc/ansible
 cat > /etc/ansible/ansible-pull.env <<-EOF
-GIT_REPO=git@github.com:xzxpurple2017/personal-infra.git
+GIT_REPO=${PLAYBOOK_REPO}
 GIT_BRANCH=main
 GIT_PATH=/etc/ansible/repos/personal-infra
-GIT_PRIVATE_KEY_PATH=/etc/ansible/ansible-pull.key
+GIT_PRIVATE_KEY_PATH=${GH_DEPLOY_KEY}
 PLAYBOOK_FILE=/etc/ansible/repos/personal-infra/ansible/${os}/main.yml
-KEY_FILE=/etc/ansible/ansible-pull.key
+KEY_FILE=${GH_DEPLOY_KEY}
 ANSIBLE_LOCAL_TEMP=/root/.ansible/tmp
 ANSIBLE_REMOTE_TEMP=/root/.ansible/tmp
 EOF
 
 # Install read-only Github deploy key
 echo "# Writing Github deploy key"
-cat > /etc/ansible/ansible-pull.key <<-EOF
------BEGIN OPENSSH PRIVATE KEY-----
-REPLACE_ME
------END OPENSSH PRIVATE KEY-----
-EOF
+tmp_git_dir=$( mktemp -d -t XXXXXXXX )
+git clone \
+    -c core.sshCommand="/usr/bin/ssh -o IdentitiesOnly=yes \
+    ${BOOTSTRAP_REPO} \
+    ${tmp_git_dir}
+ANSIBLE_VAULT_PASSWORD_FILE=.vault_pass ansible-vault view ${tmp_git_dir}/ansible/${os}/secrets.yml | yq eval '.github_readonly_deploy_key' - > ${GH_DEPLOY_KEY}
+rm -rf ${tmp_git_dir}
+rm -rf .vault_pass
+echo
 
-chmod 400 /etc/ansible/ansible-pull.key
+chmod 400 ${GH_DEPLOY_KEY}
 
 # Install Ansible Galaxy modules
 echo "# Installing Ansible Galaxy modules"
@@ -98,8 +115,8 @@ tmp_git_dir=$( mktemp -d -t XXXXXXXX )
 git clone \
     -c core.sshCommand="/usr/bin/ssh \
       -o IdentitiesOnly=yes \
-      -i /etc/ansible/ansible-pull.key" \
-    git@github.com:xzxpurple2017/personal-infra.git \
+      -i ${GH_DEPLOY_KEY}" \
+    ${PLAYBOOK_REPO} \
     ${tmp_git_dir}
 
 ansible-galaxy install -r ${tmp_git_dir}/ansible/${os}/requirements.yml
