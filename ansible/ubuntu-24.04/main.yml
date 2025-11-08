@@ -1,0 +1,9 @@
+---
+# Main playbook to configure Ubuntu 24.04 server
+# This playbook includes SSH hardening and Trojan VPN setup
+
+- name: Configure SSH Security
+  import_playbook: ssh.yml
+
+- name: Configure Trojan VPN Server
+  import_playbook: trojan-vpn.yml
