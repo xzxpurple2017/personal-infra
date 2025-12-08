@@ -31,9 +31,24 @@ hosts:
     domain_name: "your-domain.com"
     ssl_email: "your-email@example.com"
     ssh_public_key: "ssh-rsa YOUR_PUBLIC_KEY_HERE"
+    # Specify which playbooks to run on this host
+    playbooks:
+      - base       # Install required packages
+      - ssh        # Configure SSH security
+      - trojan-vpn # Set up Trojan VPN server
 ```
 
-**Note**: The playbooks will automatically detect the system UUID at runtime and load the appropriate configuration. This allows you to manage multiple servers with a single set of playbooks.
+**Note**: The `playbooks` list allows you to control which playbooks run on each host. This is useful when:
+- Some servers don't need VPN capabilities (omit `trojan-vpn`)
+- You want to manage only SSH on certain hosts (use only `base` and `ssh`)
+- Different servers have different roles in your infrastructure
+
+The playbooks will automatically detect the system UUID at runtime and:
+1. Load the appropriate configuration
+2. Check if they should run on this host
+3. Skip execution if not in the playbooks list
+
+This allows you to manage multiple servers with different configurations from a single playbook repository.
 
 ### 2. Update Default Variables (Optional)
 Edit `vars.yml` to modify default settings like:
@@ -107,6 +122,8 @@ This approach allows you to:
 - ✅ Avoid accidentally deploying the wrong configuration to a server
 - ✅ Keep host-specific settings organized and version controlled
 - ✅ Run the same playbook on different servers without manual changes
+- ✅ Selectively enable/disable playbooks per host (e.g., VPN only on some servers)
+- ✅ Maintain different server roles with the same codebase
 
 ## Features
 

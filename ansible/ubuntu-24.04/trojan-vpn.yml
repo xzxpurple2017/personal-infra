@@ -16,6 +16,19 @@
     set_fact:
       system_uuid: "{{ system_uuid_raw.stdout | trim | lower }}"
 
+  - name: Check if trojan-vpn playbook should run on this host
+    set_fact:
+      should_run: "{{ 'trojan-vpn' in hosts[system_uuid].playbooks | default([]) }}"
+    when: system_uuid in hosts
+
+  - name: Skip playbook if not configured for this host
+    meta: end_play
+    when: not (should_run | default(false))
+
+  - name: Display playbook being run
+    debug:
+      msg: "===== Running Trojan VPN Server Configuration Playbook ====="
+
   - name: Load host-specific configuration
     set_fact:
       domain_name: "{{ hosts[system_uuid].domain_name }}"
@@ -32,16 +45,17 @@
     debug:
       msg: "Loaded configuration for system UUID: {{ system_uuid }}, domain: {{ domain_name }}"
 
-  - name: Ensure UFW is enabled
-    ufw:
-      state: enabled
-      policy: "{{ ufw_policy }}"
+  - name: Install Trojan and depenencies
+    apt:
+      name: "{{ trojan_required_packages }}"
+      state: present
+      update_cache: yes
   
   - name: Configure UFW rules
     ufw:
       rule: allow
       name: "{{ item.name }}"
-    loop: "{{ ufw_rules }}"
+    loop: "{{ trojan_ufw_rules }}"
 
   - name: Remove default Nginx site
     file:
