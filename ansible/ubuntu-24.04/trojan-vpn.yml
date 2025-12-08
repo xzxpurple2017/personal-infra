@@ -43,17 +43,37 @@
       name: "{{ item.name }}"
     loop: "{{ ufw_rules }}"
 
-  - name: Start and enable Nginx
-    ansible.builtin.systemd:
-      name: nginx
-      state: started
-      enabled: yes
+  - name: Remove default Nginx site
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent
+    notify: reload nginx
 
   - name: Ensure webroot directory exists
     file:
       path: /var/www/html
       state: directory
       mode: '0755'
+
+  - name: Configure Nginx site (port 80 only)
+    template:
+      src: nginx-site.conf.j2
+      dest: "/etc/nginx/sites-available/{{ domain_name }}"
+      mode: '0644'
+    notify: reload nginx
+
+  - name: Enable Nginx site
+    file:
+      src: "/etc/nginx/sites-available/{{ domain_name }}"
+      dest: "/etc/nginx/sites-enabled/{{ domain_name }}"
+      state: link
+    notify: reload nginx
+
+  - name: Start and enable Nginx
+    ansible.builtin.systemd:
+      name: nginx
+      state: started
+      enabled: yes
 
   - name: Obtain SSL certificate with Certbot (webroot mode)
     command: >
@@ -81,21 +101,6 @@
       state: directory
       recurse: yes
 
-  - name: Remove Certbot's SSL configuration from Nginx (Trojan will handle 443)
-    replace:
-      path: "/etc/nginx/sites-available/{{ domain_name }}"
-      regexp: '(?s)listen 443 ssl;.*?ssl_dhparam.*?\.pem;.*?# managed by Certbot'
-      replace: ''
-    notify: reload nginx
-    when: certbot_result is defined
-
-  - name: Ensure Nginx only listens on port 80
-    lineinfile:
-      path: "/etc/nginx/sites-available/{{ domain_name }}"
-      regexp: '^\s*listen 443'
-      state: absent
-    notify: reload nginx
-
   - name: Check if Trojan password file exists
     stat:
       path: /root/trojan-password.txt
@@ -116,32 +121,6 @@
     set_fact:
       trojan_password: "{{ existing_password.content | b64decode | trim }}"
     when: password_file.stat.exists
-
-  - name: Remove default Nginx site
-    file:
-      path: /etc/nginx/sites-enabled/default
-      state: absent
-    notify: reload nginx
-
-  - name: Check if Nginx site config already exists
-    stat:
-      path: "/etc/nginx/sites-available/{{ domain_name }}"
-    register: nginx_site_exists
-
-  - name: Configure Nginx site (port 80 only)
-    template:
-      src: nginx-site.conf.j2
-      dest: "/etc/nginx/sites-available/{{ domain_name }}"
-      mode: '0644'
-      force: no
-    notify: reload nginx
-
-  - name: Enable Nginx site
-    file:
-      src: "/etc/nginx/sites-available/{{ domain_name }}"
-      dest: "/etc/nginx/sites-enabled/{{ domain_name }}"
-      state: link
-    notify: reload nginx
 
   - name: Ensure Trojan config directory exists
     file:
