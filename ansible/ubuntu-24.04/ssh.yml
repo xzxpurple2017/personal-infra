@@ -32,6 +32,12 @@
     debug:
       msg: "Loaded configuration for system UUID: {{ system_uuid }}, domain: {{ domain_name }}"
 
+  - name: Configure UFW rules
+    ufw:
+      rule: allow
+      name: "{{ item.name }}"
+    loop: "{{ ssh_ufw_rules }}"
+
   - name: Get current user info
     getent:
       database: passwd

@@ -13,16 +13,16 @@ required_packages:
   - apt-transport-https
   - ca-certificates
   - lsb-release
-  - nginx
-  - certbot
-  - python3-certbot-nginx
-  - trojan
 
 # UFW Configuration
 ufw_policy: allow
-ufw_rules:
+
+# SSH Configuration
+ssh_password_auth: "no"
+# ssh_public_key is loaded from host_vars.yml based on system UUID
+
+ssh_ufw_rules:
   - name: OpenSSH
-  - name: 'Nginx Full'
 
 # Trojan Configuration
 trojan_config:
@@ -34,6 +34,11 @@ trojan_config:
   cert_path: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
   key_path: "/etc/letsencrypt/live/{{ domain_name }}/privkey.pem"
 
-# SSH Configuration
-ssh_password_auth: "no"
-# ssh_public_key is loaded from host_vars.yml based on system UUID
+trojan_required_packages:
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+  - trojan
+
+trojan_ufw_rules:
+  - name: 'Nginx Full'

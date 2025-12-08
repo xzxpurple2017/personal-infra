@@ -32,16 +32,17 @@
     debug:
       msg: "Loaded configuration for system UUID: {{ system_uuid }}, domain: {{ domain_name }}"
 
-  - name: Ensure UFW is enabled
-    ufw:
-      state: enabled
-      policy: "{{ ufw_policy }}"
+  - name: Install Trojan and depenencies
+    apt:
+      name: "{{ trojan_required_packages }}"
+      state: present
+      update_cache: yes
   
   - name: Configure UFW rules
     ufw:
       rule: allow
       name: "{{ item.name }}"
-    loop: "{{ ufw_rules }}"
+    loop: "{{ trojan_ufw_rules }}"
 
   - name: Remove default Nginx site
     file:

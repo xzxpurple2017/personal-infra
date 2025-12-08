@@ -37,3 +37,8 @@
       name: "{{ required_packages }}"
       state: present
       update_cache: yes
+
+  - name: Ensure UFW is enabled
+    ufw:
+      state: enabled
+      policy: "{{ ufw_policy }}"
