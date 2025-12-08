@@ -32,11 +32,6 @@
     debug:
       msg: "Loaded configuration for system UUID: {{ system_uuid }}, domain: {{ domain_name }}"
 
-  - name: Install required packages
-    apt:
-      name: "{{ required_packages }}"
-      state: present
-      update_cache: yes
   - name: Ensure UFW is enabled
     ufw:
       state: enabled

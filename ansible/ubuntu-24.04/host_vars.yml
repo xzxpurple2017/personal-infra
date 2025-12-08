@@ -8,6 +8,11 @@ hosts:
     ssl_email: "philipdam8@gmail.com"
     ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWboxVhqvg+bo7Sy9xWkrTvtzG97+1gq6/whIx+EZ2WBS1QVbYwBwggVkQvqL/pS3Seh37KgoZnIDGmiXiqqGkfvfPkwQd/v6CnG51GHuSFpiTSOLH2Qg0qB2I5dtQW68KbMIfVHIw8BrZvixlInH/8/D44o9s4eSZzTw+PiDq7fV4t4y8d+vmcrRm6iaLzsmqbwpqwRQtMia3XUrYliBnZC4rpNBFSsruCHxgLE+kkW9Wz7sNWzNcOdB+ifPO9+tVuYdV7Bu7QCh+s3qDybX0hOvS/omxyQYpxpwsRCpjrsBj9A5gnQ8Rs2FeFI3s41fgzWuilcS7PBEs2WHYAJUT philip@DESKTOP-MGCFDQD"
 
+  69272c93-37aa-4443-8869-33a24f8a9567:
+    domain_name: "hostdare.usinfotech.llc"
+    ssl_email: "philipdam8@gmail.com"
+    ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWboxVhqvg+bo7Sy9xWkrTvtzG97+1gq6/whIx+EZ2WBS1QVbYwBwggVkQvqL/pS3Seh37KgoZnIDGmiXiqqGkfvfPkwQd/v6CnG51GHuSFpiTSOLH2Qg0qB2I5dtQW68KbMIfVHIw8BrZvixlInH/8/D44o9s4eSZzTw+PiDq7fV4t4y8d+vmcrRm6iaLzsmqbwpqwRQtMia3XUrYliBnZC4rpNBFSsruCHxgLE+kkW9Wz7sNWzNcOdB+ifPO9+tVuYdV7Bu7QCh+s3qDybX0hOvS/omxyQYpxpwsRCpjrsBj9A5gnQ8Rs2FeFI3s41fgzWuilcS7PBEs2WHYAJUT philip@DESKTOP-MGCFDQD"
+
   # Add more hosts as needed
   # example-uuid-here:
   #   domain_name: "example.com"
