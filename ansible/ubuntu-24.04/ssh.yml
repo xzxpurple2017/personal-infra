@@ -16,6 +16,19 @@
     set_fact:
       system_uuid: "{{ system_uuid_raw.stdout | trim | lower }}"
 
+  - name: Check if ssh playbook should run on this host
+    set_fact:
+      should_run: "{{ 'ssh' in hosts[system_uuid].playbooks | default([]) }}"
+    when: system_uuid in hosts
+
+  - name: Skip playbook if not configured for this host
+    meta: end_play
+    when: not (should_run | default(false))
+
+  - name: Display playbook being run
+    debug:
+      msg: "===== Running SSH Security Configuration Playbook ====="
+
   - name: Load host-specific configuration
     set_fact:
       domain_name: "{{ hosts[system_uuid].domain_name }}"
