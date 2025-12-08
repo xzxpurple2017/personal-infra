@@ -15,6 +15,13 @@
 # - Ubuntu 18.04
 #
 
+# Check if running as root
+if [[ $EUID -ne 0 ]]; then
+   echo "Error: This script must be run as root" 
+   echo "Please run with: sudo ./$(basename $0)"
+   exit 1
+fi
+
 # Get Ansible Vault password
 read -s -p "Enter Ansible Vault password: " vault_pass_input
 echo "$vault_pass_input" > .vault_pass
@@ -108,6 +115,17 @@ echo
 
 chmod 400 ${GH_DEPLOY_KEY}
 
+# Add github.com to known_hosts before any git operations
+echo "# Adding github.com to known_hosts"
+mkdir -p /root/.ssh
+cat > /root/.ssh/known_hosts <<-EOF
+github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+|1|499S/iQXkvi4EvQkUNgdrjrU5SQ=|8tyg5hTCQHWiWqJcYXu+SZSnsgU= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+|1|OlLxW5byYQK+mhm7GwZk5OzrJt8=|Ghi71T7zCeAff4QHeXehfyB67nw= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+EOF
+chmod 644 /root/.ssh/known_hosts
+echo
+
 # Install Ansible Galaxy modules
 echo "# Installing Ansible Galaxy modules"
 tmp_git_dir=$( mktemp -d -t XXXXXXXX )
@@ -161,8 +179,9 @@ OnUnitActiveSec=15m
 WantedBy=timers.target
 EOF
 
-echo "# Adding github.com RSA fingerprint to known_hosts"
-ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts
+# Update github.com known_hosts if it changed
+echo "# Updating github.com fingerprints in known_hosts"
+ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> /root/.ssh/known_hosts 2>/dev/null
 chmod 644 /root/.ssh/known_hosts
 echo
 
