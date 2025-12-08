@@ -3,9 +3,35 @@
   become: true
   vars_files:
     - vars.yml
+    - host_vars.yml
   handlers:
     - import_tasks: handlers/main.yml
   tasks:
+  - name: Detect system UUID
+    command: dmidecode -s system-uuid
+    register: system_uuid_raw
+    changed_when: false
+
+  - name: Set system UUID fact
+    set_fact:
+      system_uuid: "{{ system_uuid_raw.stdout | trim | lower }}"
+
+  - name: Load host-specific configuration
+    set_fact:
+      domain_name: "{{ hosts[system_uuid].domain_name }}"
+      ssl_email: "{{ hosts[system_uuid].ssl_email }}"
+      ssh_public_key: "{{ hosts[system_uuid].ssh_public_key }}"
+    when: system_uuid in hosts
+
+  - name: Fail if system UUID not found in host_vars.yml
+    fail:
+      msg: "System UUID {{ system_uuid }} not found in host_vars.yml. Please add configuration for this host."
+    when: system_uuid not in hosts
+
+  - name: Display loaded configuration
+    debug:
+      msg: "Loaded configuration for system UUID: {{ system_uuid }}, domain: {{ domain_name }}"
+
   - name: Install required packages
     apt:
       name: "{{ required_packages }}"
