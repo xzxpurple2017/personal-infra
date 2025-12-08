@@ -17,14 +17,32 @@ ansible-galaxy install -r requirements.yml
 
 ## Configuration
 
-### 1. Update Variables
-Edit `vars.yml` to configure:
-- Domain name
-- Email address for SSL certificates
-- SSH public key
-- Trojan server settings
+### 1. Add Your Host to host_vars.yml
 
-### 2. Optional: Manage Secrets
+First, get your system UUID:
+```bash
+sudo dmidecode -s system-uuid
+```
+
+Then edit `host_vars.yml` and add your system configuration:
+```yaml
+hosts:
+  your-system-uuid-here:
+    domain_name: "your-domain.com"
+    ssl_email: "your-email@example.com"
+    ssh_public_key: "ssh-rsa YOUR_PUBLIC_KEY_HERE"
+```
+
+**Note**: The playbooks will automatically detect the system UUID at runtime and load the appropriate configuration. This allows you to manage multiple servers with a single set of playbooks.
+
+### 2. Update Default Variables (Optional)
+Edit `vars.yml` to modify default settings like:
+- Package lists
+- UFW rules
+- Trojan server settings (ports, paths)
+- SSH configuration
+
+### 3. Optional: Manage Secrets
 For sensitive data, use `secrets.yml` (encrypted with ansible-vault):
 ```bash
 ansible-vault create secrets.yml
@@ -60,7 +78,8 @@ ansible-playbook trojan-vpn.yml
 ├── main.yml                    # Main orchestration playbook
 ├── ssh.yml                     # SSH hardening playbook
 ├── trojan-vpn.yml             # Trojan VPN setup playbook
-├── vars.yml                    # Configuration variables
+├── vars.yml                    # Default configuration variables
+├── host_vars.yml              # Host-specific configuration (by system UUID)
 ├── secrets.yml                 # Encrypted secrets (optional)
 ├── ansible.cfg                 # Ansible configuration
 ├── hosts.ini                   # Inventory file
@@ -73,6 +92,21 @@ ansible-playbook trojan-vpn.yml
     ├── nginx-site.conf.j2     # Nginx configuration
     └── letsencrypt-renewal.conf.j2  # SSL renewal configuration
 ```
+
+## How It Works
+
+The playbooks use **system UUID detection** to automatically load the correct configuration for each server:
+
+1. When you run the playbook, it executes `dmidecode -s system-uuid` to get the unique hardware identifier
+2. It looks up this UUID in `host_vars.yml` to find the host-specific configuration
+3. It loads the appropriate `domain_name`, `ssl_email`, and `ssh_public_key` for that server
+4. If the UUID is not found, the playbook fails with a helpful error message
+
+This approach allows you to:
+- ✅ Manage multiple servers with one playbook repository
+- ✅ Avoid accidentally deploying the wrong configuration to a server
+- ✅ Keep host-specific settings organized and version controlled
+- ✅ Run the same playbook on different servers without manual changes
 
 ## Features
 
