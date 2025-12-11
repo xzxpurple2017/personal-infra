@@ -13,6 +13,7 @@ required_packages:
   - apt-transport-https
   - ca-certificates
   - lsb-release
+  - inetutils-traceroute
 
 # UFW Configuration
 ufw_policy: allow
