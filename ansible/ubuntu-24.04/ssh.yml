@@ -83,7 +83,7 @@
       dest: /etc/ssh/sshd_config
       mode: '0644'
       backup: yes
-    notify: restart sshd
+    notify: restart ssh
 
   - name: Check if cloud-init SSH config exists
     stat:
@@ -97,11 +97,11 @@
       line: 'PasswordAuthentication no'
       backup: yes
     when: cloud_init_ssh_config.stat.exists
-    notify: restart sshd
+    notify: restart ssh
 
   - name: Remove cloud-init SSH config file (alternative approach)
     file:
       path: /etc/ssh/sshd_config.d/50-cloud-init.conf
       state: absent
     when: cloud_init_ssh_config.stat.exists
-    notify: restart sshd
+    notify: restart ssh
