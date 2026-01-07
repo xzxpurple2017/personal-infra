@@ -1,6 +1,6 @@
 ---
 # Default configuration values
-# Host-specific values (domain_name, ssl_email, ssh_public_key) are loaded from host_vars.yml
+# Host-specific values (domain_name, ssl_email, ssh_public_keys) are loaded from host_vars.yml
 # based on the system UUID detected at runtime
 
 # Package list for installation
@@ -20,7 +20,7 @@ ufw_policy: allow
 
 # SSH Configuration
 ssh_password_auth: "no"
-# ssh_public_key is loaded from host_vars.yml based on system UUID
+# ssh_public_keys is loaded from host_vars.yml based on system UUID
 
 ssh_ufw_rules:
   - name: OpenSSH

@@ -33,7 +33,7 @@
     set_fact:
       domain_name: "{{ hosts[system_uuid].domain_name }}"
       ssl_email: "{{ hosts[system_uuid].ssl_email }}"
-      ssh_public_key: "{{ hosts[system_uuid].ssh_public_key }}"
+      ssh_public_keys: "{{ hosts[system_uuid].ssh_public_keys }}"
     when: system_uuid in hosts
 
   - name: Fail if system UUID not found in host_vars.yml
