@@ -33,7 +33,7 @@
     set_fact:
       domain_name: "{{ hosts[system_uuid].domain_name }}"
       ssl_email: "{{ hosts[system_uuid].ssl_email }}"
-      ssh_public_key: "{{ hosts[system_uuid].ssh_public_key }}"
+      ssh_public_keys: "{{ hosts[system_uuid].ssh_public_keys }}"
     when: system_uuid in hosts
 
   - name: Fail if system UUID not found in host_vars.yml
@@ -69,13 +69,12 @@
       owner: "{{ ansible_user_id }}"
       group: "{{ ansible_user_id }}"
 
-  # TODO: In the future, support multiple SSH keys
-  - name: Add SSH public key to authorized_keys
+  - name: Add SSH public keys to authorized_keys
     authorized_key:
       user: "{{ ansible_user_id }}"
       state: present
-      key: "{{ ssh_public_key }}"
-      comment: "philip@DESKTOP-MGCFDQD"
+      key: "{{ item }}"
+    loop: "{{ ssh_public_keys }}"
 
   - name: Configure OpenSSH server
     template:
