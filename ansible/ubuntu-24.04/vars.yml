@@ -14,6 +14,7 @@ required_packages:
   - ca-certificates
   - lsb-release
   - inetutils-traceroute
+  - speedtest-cli
 
 # UFW Configuration
 ufw_policy: allow
