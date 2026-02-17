@@ -15,6 +15,7 @@ required_packages:
   - lsb-release
   - inetutils-traceroute
   - speedtest-cli
+  - plocate
 
 # UFW Configuration
 ufw_policy: allow
