@@ -17,6 +17,7 @@ required_packages:
   - net-tools
   - speedtest-cli
   - plocate
+  - socat
 
 # UFW Configuration
 ufw_policy: allow
