@@ -18,6 +18,7 @@ required_packages:
   - speedtest-cli
   - plocate
   - socat
+  - vnstat
 
 # UFW Configuration
 ufw_policy: allow
